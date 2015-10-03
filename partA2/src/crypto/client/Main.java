@@ -18,6 +18,7 @@ public class Main {
 	
 	// log4j logger for debug
 	private static Logger log = Logger.getLogger(Main.class);
+	
 
 	public static void main(String[] args) {		
 		// parse arguments

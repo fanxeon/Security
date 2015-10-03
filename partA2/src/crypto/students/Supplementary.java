@@ -49,17 +49,17 @@ public class Supplementary {
 	 */
 	public static BigInteger deriveSuppementaryKey(BigInteger key, BigInteger p) {
 		BigInteger result = BigInteger.ZERO;
-		//Result = g^a mod p, a = key , p = p, g generate randomly
+		//Result = g^a mod p, a = key , p = p, looking for g
 		//Result must in 64 bit/8 byte will not exceed to 255
 		final BigInteger max = BigInteger.valueOf(255);
 		BigInteger tmp = BigInteger.ZERO;
 		Random rnd = new Random();
 		int bitLength = 64;
-		
+		tmp = tmp.probablePrime(bitLength, rnd);
 		for (int i = 0 ; i < 255 ; i++ ){
-			tmp = tmp.probablePrime(bitLength, rnd);
-			if ((tmp.modPow(key, p)).compareTo(max) < 0){ // g^a mod p < 255
-				result = tmp.modPow(key, p);
+
+			if ((tmp.modPow(p, key)).compareTo(max) < 0){ // g^a mod p < 255
+				result = tmp.modPow(p, key);
 				break;
 			}
 		}

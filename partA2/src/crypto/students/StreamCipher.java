@@ -1,5 +1,7 @@
 package crypto.students;
 
+import java.awt.Dialog.ModalExclusionType;
+import java.awt.print.Printable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Base64;
@@ -21,6 +23,7 @@ public class StreamCipher {
 		this.prime = prime; // DH prime modulus
 		this.p1 = Supplementary.deriveSuppementaryKey(share, p);
 		this.p2 = Supplementary.deriveSuppementaryKey(share, q);
+		System.out.println(p2);
 		this.r_i = BigInteger.ZERO; // shift register
 	}
 	
@@ -28,7 +31,16 @@ public class StreamCipher {
 	 * Updates the shift register for XOR-ing the next byte.
 	 */
 	public void updateShiftRegister() {
-		r_i = (p1.multiply(r_i)).add( p2);
+		BigInteger r_i_1 = BigInteger.ZERO;
+		if (r_i.equals(Supplementary.parityWordChecksum(key))){
+			r_i_1 = Supplementary.parityWordChecksum(key);
+		}
+		else {
+			r_i_1 = r_i_1.shiftRight(8);
+			//System.out.println(false);
+		}
+		r_i = ( ( (p1.multiply(r_i_1)) .add(p2)).mod(prime));
+		//r_i = ((prime.add(r_i.shiftRight(1))).subtract(p2)).divide(p1);
 	}
 
 	/***
@@ -44,25 +56,18 @@ public class StreamCipher {
 	 * @param n The number of bits taken
 	 * @return The n most significant bits from value
 	 */
-	private byte msb(BigInteger value, int n) {
-		BigInteger mask = BigInteger.ONE.setBit(n - 1);
-		//System.out.println(mask);
+	byte msb(BigInteger value, int n) {
 		final BigInteger tmp = BigInteger.valueOf(255);
-		String bin = null;
 		int bitLength = 0;
 		bitLength = value.bitLength();	
-		//bin = value.toString(2);
+
 		if (value.compareTo(tmp) < 0 ){
 			return (byte)value.intValue();
 		}
 		else {
-			//System.out.println(bitLength);
 			for (int i = 0 ; i>= 0 ; i ++ ){
 				if (bitLength - i == n ){
-					//bin = value.shiftRight(i).toString(2);
-					//System.out.println(value.shiftRight(i).intValue());
 					int int_value = value.shiftRight(i).intValue();
-					// fix negative number + 256
 					return (byte)int_value;
 				}
 			}
@@ -76,17 +81,24 @@ public class StreamCipher {
 	 * @return If PT, then output is CT and vice-versa.
 	 */
 	private byte[] _crypt(byte[] msg) {
-		String plain_text = null;
-		String cipher_text = null;
-		//E(bi) = bi ⊕ MSB[(ari + b) mod p]
-		//Encryption
-		
-		
-		
-		//D(bi) = bi ⊕ MSB[(ari + b) mod p]
-		//Decryption
-		
-		return null;
+		int bitLength = 0;
+		bitLength = msg.length;
+		byte[] result = new byte[bitLength];
+		//String s = new String(msg);
+		//System.out.println(s);
+		reset();
+
+
+		for ( int i = 0 ; i < bitLength; i++ ) {
+			result[i] = (byte) ((msg[i]^(msb(r_i, 8))));
+			// Formula : E(bi) = bi ⊕ MSB[(ari + b) mod p]
+			updateShiftRegister();
+			//System.out.print(cipher_text[i]);
+			//result[i] = msg[i];
+		}
+	
+
+		return result;
 	}
 	
 	//-------------------------------------------------------------------//
