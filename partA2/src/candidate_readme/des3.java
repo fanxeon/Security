@@ -1,4 +1,4 @@
-package partA2;
+package candidate_readme;
 
 public class des3 {
 	// initial permuation table

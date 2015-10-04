@@ -23,7 +23,6 @@ public class StreamCipher {
 		this.prime = prime; // DH prime modulus
 		this.p1 = Supplementary.deriveSuppementaryKey(share, p);
 		this.p2 = Supplementary.deriveSuppementaryKey(share, q);
-		System.out.println(p2);
 		this.r_i = BigInteger.ZERO; // shift register
 	}
 	
@@ -31,20 +30,20 @@ public class StreamCipher {
 	 * Updates the shift register for XOR-ing the next byte.
 	 */
 	public void updateShiftRegister() {
-		BigInteger r_i_1 = BigInteger.ZERO;
-		if (r_i.equals(Supplementary.parityWordChecksum(key))){
-			r_i_1 = Supplementary.parityWordChecksum(key);
-		}
-		else {
-			r_i_1 = r_i_1.shiftRight(8);
-			//System.out.println(false);
-		}
-		r_i = ( ( (p1.multiply(r_i_1)) .add(p2)).mod(prime));
-		//r_i = ((prime.add(r_i.shiftRight(1))).subtract(p2)).divide(p1);
+		// Formula : ri = (ari−1 + b) mod p 
+		// Thinking iteration
+		// 1. r1 = r0 = 192
+		// 2. r2 = (a*r1 + b) mod p = (1 * 192 + 4) mod 11 = 9
+		// 3. r3 = ( 1 * 9 + 4 ) mod 11 =  2
+		// 4. r4 = ( 1 * 2 + 4 ) mod 11 =  6
+		// 5. r5 = ( 1 * 6 + 4 ) mod 11 = 10
+		BigInteger r_i_1; // Hold r_i-1 value;
+		r_i = ( ( (p1.multiply(r_i)) .add(p2)).mod(prime)); // perform ri-1 to ri
+		r_i_1 = r_i.shiftLeft(r_i.intValue()); // Store ri-1 = ri for next loop
 	}
 
 	/***
-	 * This function returns the shift register to its initial possition
+	 * This function returns the shift register to its initial position
 	 */
 	public void reset() {
 		r_i = Supplementary.parityWordChecksum(key);
@@ -57,16 +56,17 @@ public class StreamCipher {
 	 * @return The n most significant bits from value
 	 */
 	byte msb(BigInteger value, int n) {
-		final BigInteger tmp = BigInteger.valueOf(255);
-		int bitLength = 0;
-		bitLength = value.bitLength();	
-
-		if (value.compareTo(tmp) < 0 ){
+		final BigInteger min = BigInteger.valueOf(255); // Set a min bound, 
+		int bitLength = value.bitLength();	// get value length of bits
+		//if value < 2^8 -1 then return directly
+		if (value.compareTo(min) < 0 ){
 			return (byte)value.intValue();
 		}
 		else {
+			// Implement to find MSB
 			for (int i = 0 ; i>= 0 ; i ++ ){
 				if (bitLength - i == n ){
+					// Loop until there are n bits left
 					int int_value = value.shiftRight(i).intValue();
 					return (byte)int_value;
 				}
@@ -80,24 +80,26 @@ public class StreamCipher {
 	 * @param msg Either Plain Text or Cipher Text.
 	 * @return If PT, then output is CT and vice-versa.
 	 */
-	private byte[] _crypt(byte[] msg) {
+	private byte[] _crypt(byte[] msg) { // No matter En or decrypt but make sure shift to right place
+		// Get total length of msg
 		int bitLength = 0;
 		bitLength = msg.length;
+		// Declare result array with same length as 
 		byte[] result = new byte[bitLength];
-		//String s = new String(msg);
-		//System.out.println(s);
+		
+		// Reset the register to Checksum value at every call
 		reset();
 
-
 		for ( int i = 0 ; i < bitLength; i++ ) {
-			result[i] = (byte) ((msg[i]^(msb(r_i, 8))));
 			// Formula : E(bi) = bi ⊕ MSB[(ari + b) mod p]
+			// (ari + b) mod p = r_i
+			// 8 has set to default bits exact
+			result[i] = (byte) ((msg[i]^(msb(r_i, 8))));
+			
+			// Update register position in every literate
 			updateShiftRegister();
-			//System.out.print(cipher_text[i]);
-			//result[i] = msg[i];
+			//System.out.println(result[i]);
 		}
-	
-
 		return result;
 	}
 	

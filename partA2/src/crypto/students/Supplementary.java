@@ -27,14 +27,20 @@ public class Supplementary {
 	 * @return A 64 bit integer
 	 */
 	public static BigInteger parityWordChecksum(BigInteger key) {
-	    BigInteger result = new BigInteger("0");
-
+		// Initial some BigInteger
+	    BigInteger result = BigInteger.ZERO;
 	    BigInteger mask = BigInteger.ZERO;
+	    
+	    // 1 Byte = 8 bits
+	    // Set a mask for further use
 	    for (int i = 0; i < 64; i++) {
 	        mask = mask.setBit(i);
 	    }
 
+	    // Income key is 2048 bits as bound
+	    // It shift 8 * 8 = 64 ' steps' in each round
 	    for (int i = 0; i < 2048; i += 64) {
+	    	//Computes the exclusive or (XOR) of all its words, including the checksum
 	        result = result.xor(key.shiftRight(i).and(mask));
 	    }
 
@@ -49,20 +55,9 @@ public class Supplementary {
 	 */
 	public static BigInteger deriveSuppementaryKey(BigInteger key, BigInteger p) {
 		BigInteger result = BigInteger.ZERO;
-		//Result = g^a mod p, a = key , p = p, looking for g
-		//Result must in 64 bit/8 byte will not exceed to 255
-		final BigInteger max = BigInteger.valueOf(255);
-		BigInteger tmp = BigInteger.ZERO;
-		Random rnd = new Random();
-		int bitLength = 64;
-		tmp = tmp.probablePrime(bitLength, rnd);
-		for (int i = 0 ; i < 255 ; i++ ){
-
-			if ((tmp.modPow(p, key)).compareTo(max) < 0){ // g^a mod p < 255
-				result = tmp.modPow(p, key);
-				break;
-			}
-		}
+		// Dervie key simple use mod operation
+		result = key.mod(p);
+		
 		return result;
 	}
 }

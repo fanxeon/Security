@@ -1,4 +1,4 @@
-package partA2;
+package candidate_readme;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -10,7 +10,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import java.util.Base64;
-
+/*
+ * # Sample Test Case
+# Plaintext: 0x02468aceeca86420
+# Ciphertext: 0xda02ce3a89ecac3b
+# Key: 0x0f1571c947d9e859
+*/
 public class Des {
 
 	    public static final String KEY_ALGORITHM = "DES";
@@ -18,6 +23,9 @@ public class Des {
 	    public static final String CIPHER_ALGORITHM = "DES/ECB/NoPadding";
 	    
 	    public static void main(String[] args) throws Exception {
+	    	//byte plaint_text = (byte) 0x02468aceeca86420;
+	    	//byte cipher_text = (byte) 0xda02ce3a89ecac3b;
+	    	//byte key = (byte) 0x0f1571c947d9e859;
 	        String source = "amigoxie";
 	        System.out.println("Plain text: " + source);
 	        String key = "A1B2C3D4E5F60708";

@@ -1,4 +1,4 @@
-package partA2;
+package candidate_readme;
 /*
  * Copyright 2011 David Simmons
  * http://cafbit.com/entry/implementing_des
